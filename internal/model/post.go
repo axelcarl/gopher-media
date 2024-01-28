@@ -8,9 +8,9 @@ import (
 
 type Post struct {
 	gorm.Model
-	Title string `json:"title" binding:"required"`
-	Text string `json:"text" binding:"required"`
-	UserID uint `json:"user_id" binding:"required"`
+	Title  string `json:"title" binding:"required"`
+	Text   string `json:"text" binding:"required"`
+	UserID uint   `json:"user_id" binding:"required"`
 }
 
 func CreatePost(post *Post) error {
@@ -23,5 +23,3 @@ func GetPost(id uint) (*Post, error) {
 	result := database.DB.First(&post, id)
 	return &post, result.Error
 }
-
-

@@ -10,7 +10,7 @@ import (
 
 type User struct {
 	gorm.Model
-	Name string `json:"name" binding:"required"`
+	Name  string `json:"name" binding:"required"`
 	Posts []Post `json:"post" binding:"required"`
 }
 
@@ -25,7 +25,7 @@ func CreateUser(user *User) error {
 
 func GetUser(id uint) (*User, error) {
 	var user User
-	result := database.DB.First(&user, id)
+	result := database.DB.Preload("Posts").First(&user, id)
 	return &user, result.Error
 }
 
