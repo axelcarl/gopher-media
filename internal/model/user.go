@@ -11,6 +11,7 @@ import (
 type User struct {
 	gorm.Model
 	Name string `json:"name" binding:"required"`
+	Posts []Post `json:"post" binding:"required"`
 }
 
 type UserUpdateFields struct {

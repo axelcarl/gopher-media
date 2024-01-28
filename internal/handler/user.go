@@ -31,7 +31,7 @@ func UserRoutes(router *gin.RouterGroup) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"user-id":  user.ID,
+			"user_id":  user.ID,
 			"username": user.Name,
 		})
 		return
@@ -55,7 +55,7 @@ func UserRoutes(router *gin.RouterGroup) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"message":  "User created.",
-			"user-id":  user.ID,
+			"user_id":  user.ID,
 			"username": user.Name,
 		})
 		return

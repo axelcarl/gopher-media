@@ -34,9 +34,11 @@ func main() {
 
 	// Run migrations.
 	database.DB.AutoMigrate(&model.User{})
+	database.DB.AutoMigrate(&model.Post{})
 
 	// Setup routes.
 	handler.UserRoutes(r.Group("/user"))
+	handler.PostRoutes(r.Group("/post"))
 
 	// Run application.
 	r.Run()
