@@ -30,10 +30,7 @@ func UserRoutes(router *gin.RouterGroup) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"user-id":  user.ID,
-			"username": user.Name,
-		})
+		c.JSON(http.StatusOK, user)
 		return
 	})
 
@@ -55,7 +52,7 @@ func UserRoutes(router *gin.RouterGroup) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"message":  "User created.",
-			"user-id":  user.ID,
+			"user_id":  user.ID,
 			"username": user.Name,
 		})
 		return
@@ -121,17 +118,20 @@ func UserRoutes(router *gin.RouterGroup) {
 			return
 		}
 
-		if err := model.DeleteUser(uint(id)); err != nil {
-			if err.Error() == "User not found." {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "User not found.", 
-				})
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"message": "Something went wrong.",
-					"error": err.Error(),
-				})
-			}
+		user, err := model.GetUser(uint(id))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "User not found.",
+			})
+			return
+		}
+
+		if err = model.DeleteUser(user); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong.",
+				"error":   err.Error(),
+			})
 			return
 		}
 
