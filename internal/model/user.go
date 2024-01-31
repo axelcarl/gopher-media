@@ -11,7 +11,7 @@ import (
 type User struct {
 	gorm.Model
 	Name  string `json:"name" binding:"required"`
-	Posts []Post `json:"post" binding:"required"`
+	Posts []Post `json:"posts"`
 }
 
 type UserUpdateFields struct {
@@ -39,12 +39,7 @@ func UpdateUser(user *User, newFields *UserUpdateFields) error {
 	return errors.New("No valid field provided.")
 }
 
-func DeleteUser(id uint) error {
-	user, err := GetUser(id)
-	if err != nil {
-		return errors.New("User not found.")
-	}
-
+func DeleteUser(user *User) error {
 	result := database.DB.Delete(&user)
 	return result.Error
 }

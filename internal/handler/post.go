@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/axelcarl/gopher-media/internal/model"
 
@@ -9,6 +10,30 @@ import (
 )
 
 func PostRoutes(router *gin.RouterGroup) {
+	// Get endpoint /post/:id.
+	router.GET("/:id", func(c *gin.Context) {
+		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ID has to be of type uint.",
+			})
+			return
+		}
+
+		post, err := model.GetPost(uint(id))
+
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "Post does not exist.",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, post)
+		return
+	})
+
 	// Post endpoint /post.
 	router.POST("/", func(c *gin.Context) {
 		var post model.Post
@@ -28,7 +53,7 @@ func PostRoutes(router *gin.RouterGroup) {
 		}
 
 		err = model.CreatePost(&post)
-		
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Something went wrong.",
@@ -37,11 +62,85 @@ func PostRoutes(router *gin.RouterGroup) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message":  "User created.",
-			"post_id":  post.ID,
-			"title": post.Title,
+			"message": "Post created.",
+			"post_id": post.ID,
+			"title":   post.Title,
 		})
 		return
 	})
 
+	// Put endpoint /post:id
+	router.PUT("/:id", func(c *gin.Context) {
+		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ID has to be of type uint.",
+			})
+			return
+		}
+
+		post, err := model.GetPost(uint(id))
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong.",
+			})
+			return
+		}
+
+		var newFields model.PostUpdateFields
+
+		err = c.ShouldBindJSON(&newFields)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Expected json object with mutable fields.",
+			})
+			return
+		}
+
+		err = model.UpdatePost(post, &newFields)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, post)
+		return
+	})
+
+	// Get endpoint /post/:id.
+	router.DELETE("/:id", func(c *gin.Context) {
+		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ID has to be of type uint.",
+			})
+			return
+		}
+
+		post, err := model.GetPost(uint(id))
+
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "Post does not exist.",
+			})
+			return
+		}
+
+		err = model.DeletePost(post)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Post deleted.",
+		})
+		return
+	})
 }
