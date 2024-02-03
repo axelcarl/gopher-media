@@ -7,6 +7,7 @@ import (
 	"github.com/axelcarl/gopher-media/internal/model"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func PostRoutes(router *gin.RouterGroup) {
@@ -16,7 +17,8 @@ func PostRoutes(router *gin.RouterGroup) {
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "ID has to be of type uint.",
+				"message": "Id must be an unsigned integer.",
+				"error":   err.Error(),
 			})
 			return
 		}
@@ -24,9 +26,17 @@ func PostRoutes(router *gin.RouterGroup) {
 		post, err := model.GetPost(uint(id))
 
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-				"message": "Post does not exist.",
-			})
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{
+					"message": "Post does not exist.",
+					"error":   err.Error(),
+				})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Something went wrong.",
+					"error":   err.Error(),
+				})
+			}
 			return
 		}
 
@@ -38,7 +48,10 @@ func PostRoutes(router *gin.RouterGroup) {
 	router.POST("/", func(c *gin.Context) {
 		var post model.Post
 		if err := c.ShouldBindJSON(&post); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Request body is not a valid post.",
+				"error":   err.Error(),
+			})
 			return
 		}
 
@@ -46,9 +59,17 @@ func PostRoutes(router *gin.RouterGroup) {
 		_, err := model.GetUser(post.UserID)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "User ID provided is not valid.",
-			})
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{
+					"message": "Creator of post (user) does not exist.",
+					"error":   err.Error(),
+				})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Something went wrong.",
+					"error":   err.Error(),
+				})
+			}
 			return
 		}
 
@@ -57,6 +78,7 @@ func PostRoutes(router *gin.RouterGroup) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Something went wrong.",
+				"error":   err.Error(),
 			})
 			return
 		}
@@ -64,7 +86,6 @@ func PostRoutes(router *gin.RouterGroup) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Post created.",
 			"post_id": post.ID,
-			"title":   post.Title,
 		})
 		return
 	})
@@ -76,6 +97,7 @@ func PostRoutes(router *gin.RouterGroup) {
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "ID has to be of type uint.",
+				"error":   err.Error(),
 			})
 			return
 		}
@@ -83,9 +105,17 @@ func PostRoutes(router *gin.RouterGroup) {
 		post, err := model.GetPost(uint(id))
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Something went wrong.",
-			})
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{
+					"message": "Post does not exist",
+					"error":   err.Error(),
+				})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Something went wrong.",
+					"error":   err.Error(),
+				})
+			}
 			return
 		}
 
@@ -95,7 +125,8 @@ func PostRoutes(router *gin.RouterGroup) {
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "Expected json object with mutable fields.",
+				"message": "Body provided is not a valid post.",
+				"error":   err.Error(),
 			})
 			return
 		}
@@ -103,11 +134,16 @@ func PostRoutes(router *gin.RouterGroup) {
 		err = model.UpdatePost(post, &newFields)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong",
+				"error":   err.Error(),
+			})
 			return
 		}
 
-		c.JSON(http.StatusOK, post)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Post was updated.",
+		})
 		return
 	})
 
@@ -117,7 +153,8 @@ func PostRoutes(router *gin.RouterGroup) {
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "ID has to be of type uint.",
+				"message": "ID must be an unsigned integer.",
+				"error":   err.Error(),
 			})
 			return
 		}
@@ -125,21 +162,31 @@ func PostRoutes(router *gin.RouterGroup) {
 		post, err := model.GetPost(uint(id))
 
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-				"message": "Post does not exist.",
-			})
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{
+					"message": "Post already deleted.",
+				})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Something went wrong.",
+					"error":   err.Error(),
+				})
+			}
 			return
 		}
 
 		err = model.DeletePost(post)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong",
+				"error":   err.Error(),
+			})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Post deleted.",
+			"message": "Post was deleted.",
 		})
 		return
 	})
