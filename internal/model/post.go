@@ -17,7 +17,7 @@ type Post struct {
 
 type PostUpdateFields struct {
 	Title *string `json:"title" binding:"required"`
-	Text *string `json:"text" binding:"required"`
+	Text  *string `json:"text" binding:"required"`
 }
 
 func CreatePost(post *Post) error {
@@ -31,11 +31,11 @@ func GetPost(id uint) (*Post, error) {
 	return &post, result.Error
 }
 
-func UpdatePost(post *Post, postUpdateFields *PostUpdateFields) (error) {
+func UpdatePost(post *Post, postUpdateFields *PostUpdateFields) error {
 	if postUpdateFields.Text != nil && postUpdateFields.Title != nil {
 		post.Title = *postUpdateFields.Title
 		post.Text = *postUpdateFields.Text
-		result := database.DB.Save(&post);
+		result := database.DB.Save(&post)
 		return result.Error
 	}
 	return errors.New("Missing fields.")
