@@ -46,8 +46,8 @@ func UserRoutes(router *gin.RouterGroup) {
 
 	// Post endpoint /user.
 	router.POST("/", func(c *gin.Context) {
-		var user model.User
-		if err := c.ShouldBindJSON(&user); err != nil {
+		var userCredentials model.UserRegistrationFields
+		if err := c.ShouldBindJSON(&userCredentials); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "Request body is not a valid as a user.",
 				"error":   err.Error(),
@@ -55,6 +55,7 @@ func UserRoutes(router *gin.RouterGroup) {
 			return
 		}
 
+		user := model.User{Name: userCredentials.Name, Password: userCredentials.Password}
 		err := model.CreateUser(&user)
 
 		if err != nil {

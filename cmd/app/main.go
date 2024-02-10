@@ -37,6 +37,7 @@ func main() {
 	database.DB.AutoMigrate(&model.Post{})
 
 	// Setup routes.
+	handler.AuthRoutes(r.Group("/"))
 	handler.UserRoutes(r.Group("/user"))
 	handler.PostRoutes(r.Group("/post"))
 
