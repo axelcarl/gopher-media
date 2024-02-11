@@ -17,7 +17,7 @@ type User struct {
 }
 
 type UserRegistrationFields struct {
-	Name string `json:"name" binding:"required"`
+	Name     string `json:"name" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -52,21 +52,21 @@ func CreateUser(user *User) error {
 	return result.Error
 }
 
-func LoginUser(credentials *UserLoginFields) error {
+func LoginUser(credentials *UserLoginFields) (uint, error) {
 	var user User
 	result := database.DB.Where("name = ?", credentials.Name).First(&user)
 
 	if result.Error != nil {
-		return result.Error
+		return 0, result.Error
 	}
 
 	match := CheckPasswordHash(user.Password, credentials.Password)
 
 	if match == false {
-		return errors.New("Passwords not matching.")
+		return 0, errors.New("Passwords not matching.")
 	}
 
-	return nil
+	return user.ID, nil
 }
 
 func GetUser(id uint) (*User, error) {
