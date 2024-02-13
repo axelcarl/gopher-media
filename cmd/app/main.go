@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/axelcarl/gopher-media/internal/cache"
 	"github.com/axelcarl/gopher-media/internal/database"
@@ -9,6 +10,7 @@ import (
 	"github.com/axelcarl/gopher-media/internal/middleware"
 	"github.com/axelcarl/gopher-media/internal/model"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
@@ -17,6 +19,19 @@ import (
 
 func main() {
 	r := gin.Default()
+
+	// Setup CORS.
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+				return origin == "https://github.com"
+		},
+		MaxAge: 12 * time.Hour,
+}))
 
 	// load dotenv variables.
 	err := godotenv.Load()
