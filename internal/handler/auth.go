@@ -13,7 +13,7 @@ import (
 
 const ONE_DAY int = 86400
 
-func AuthRoutes(router *gin.RouterGroup, rdb *redis.Client) {
+func AuthRoutes(router *gin.RouterGroup, rdb *redis.Client, authFunc func(rdb *redis.Client) gin.HandlerFunc) {
 	router.POST("/login", func(c *gin.Context) {
 		var credentials model.UserLoginFields
 		err := c.ShouldBindJSON(&credentials)
@@ -36,7 +36,7 @@ func AuthRoutes(router *gin.RouterGroup, rdb *redis.Client) {
 			return
 		}
 
-		sessionID, err := cache.CreateSession(rdb, fmt.Sprint(userID), time.Hour)
+		sessionID, _ := cache.CreateSession(rdb, fmt.Sprint(userID), time.Hour)
 
 		c.SetCookie("session_id", sessionID, ONE_DAY, "/", "", false, true)
 
@@ -45,4 +45,6 @@ func AuthRoutes(router *gin.RouterGroup, rdb *redis.Client) {
 		})
 		return
 	})
+
+	router.GET("/authenticate", authFunc(rdb))
 }

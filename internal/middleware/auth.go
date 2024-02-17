@@ -19,7 +19,10 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 
 		userID, err := cache.GetUserIDBySession(rdb, sessionID)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid session.",
+				"error": err.Error(),
+			})
 			c.Abort()
 			return
 		}

@@ -24,11 +24,11 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-				return origin == "https://github.com"
+				return origin == "https://localhost:3000"
 		},
 		MaxAge: 12 * time.Hour,
 }))
@@ -66,7 +66,7 @@ func main() {
 	// Setup routing.
 
 	// Auth routes.
-	handler.AuthRoutes(r.Group("/"), redisClient)
+	handler.AuthRoutes(r.Group("/"), redisClient, middleware.AuthMiddleware)
 
 	// User routes.
 	userRoutes := r.Group("/user")
