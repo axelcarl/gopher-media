@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/axelcarl/gopher-media/internal/middleware"
 	"github.com/axelcarl/gopher-media/internal/model"
 
 	"github.com/gin-gonic/gin"
@@ -91,7 +92,7 @@ func PostRoutes(router *gin.RouterGroup) {
 	})
 
 	// Put endpoint /post:id
-	router.PUT("/:id", func(c *gin.Context) {
+	router.PUT("/:id", middleware.OwnerMiddleware(), func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 
 		if err != nil {
@@ -148,7 +149,7 @@ func PostRoutes(router *gin.RouterGroup) {
 	})
 
 	// Get endpoint /post/:id.
-	router.DELETE("/:id", func(c *gin.Context) {
+	router.DELETE("/:id", middleware.OwnerMiddleware(), func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 
 		if err != nil {
