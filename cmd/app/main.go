@@ -70,8 +70,7 @@ func main() {
 
 	// User routes.
 	userRoutes := r.Group("/user")
-	userRoutes.Use(middleware.AuthMiddleware(redisClient))
-	handler.UserRoutes(userRoutes)
+	handler.UserRoutes(userRoutes, middleware.AuthMiddleware(redisClient))
 
 	// Post routes.
 	postRoutes := r.Group("/post")

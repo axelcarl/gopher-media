@@ -10,9 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func UserRoutes(router *gin.RouterGroup) {
+func UserRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
 	// Get endpoint /user/:id.
-	router.GET("/:id", func(c *gin.Context) {
+	router.GET("/:id", authMiddleware, func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 
 		if err != nil {
@@ -74,7 +74,7 @@ func UserRoutes(router *gin.RouterGroup) {
 	})
 
 	// Put endpoint /user/:id.
-	router.PUT("/:id", func(c *gin.Context) {
+	router.PUT("/:id", authMiddleware, func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -134,7 +134,7 @@ func UserRoutes(router *gin.RouterGroup) {
 	})
 
 	// Delete endpoint /user/:id.
-	router.DELETE("/:id", func(c *gin.Context) {
+	router.DELETE("/:id", authMiddleware, func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
