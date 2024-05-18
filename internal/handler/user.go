@@ -45,7 +45,7 @@ func UserRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
 	})
 
 	// Post endpoint /user.
-	router.POST("/", func(c *gin.Context) {
+	router.POST("", func(c *gin.Context) {
 		var userCredentials model.UserRegistrationFields
 		if err := c.ShouldBindJSON(&userCredentials); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

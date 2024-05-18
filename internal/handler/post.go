@@ -46,7 +46,7 @@ func PostRoutes(router *gin.RouterGroup) {
 	})
 
 	// Post endpoint /post.
-	router.POST("/", func(c *gin.Context) {
+	router.POST("", func(c *gin.Context) {
 		var post model.Post
 		if err := c.ShouldBindJSON(&post); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -193,7 +193,7 @@ func PostRoutes(router *gin.RouterGroup) {
 	})
 
 	// Get endpoint /post.
-	router.GET("/", func(c *gin.Context) {
+	router.GET("", func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Query("id"))
 
 		if err != nil {
