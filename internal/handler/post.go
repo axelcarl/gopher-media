@@ -148,7 +148,7 @@ func PostRoutes(router *gin.RouterGroup) {
 		return
 	})
 
-	// Get endpoint /post/:id.
+	// Delete endpoint /post/:id.
 	router.DELETE("/:id", middleware.OwnerMiddleware(), func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 
@@ -190,5 +190,32 @@ func PostRoutes(router *gin.RouterGroup) {
 			"message": "Post was deleted.",
 		})
 		return
+	})
+
+	// Get endpoint /post.
+	router.GET("/", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Query("id"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ID provided is not valid",
+			})
+			return
+		}
+
+		amount, err := strconv.Atoi(c.Query("amount"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Amount provided is not valid",
+			})
+			return
+		}
+
+		posts, _ := model.GetPosts(id, amount)
+
+		c.JSON(http.StatusOK, gin.H{
+			"posts": posts,
+		})
 	})
 }
