@@ -15,6 +15,13 @@ type Post struct {
 	UserID uint   `json:"user_id" binding:"required"`
 }
 
+type PostWithUserData struct {
+	ID    int    `json:"id" binding:"required"`
+	Title string `json:"title" binding:"required"`
+	Text  string `json:"text" binding:"required"`
+	Name  string `json:"username" binding:"required"`
+}
+
 type PostUpdateFields struct {
 	Title *string `json:"title" binding:"required"`
 	Text  *string `json:"text" binding:"required"`
@@ -44,4 +51,30 @@ func UpdatePost(post *Post, postUpdateFields *PostUpdateFields) error {
 func DeletePost(post *Post) error {
 	result := database.DB.Delete(&post)
 	return result.Error
+}
+
+func GetPosts(startingID, amount int) ([]PostWithUserData, error) {
+	var posts []PostWithUserData
+	var result *gorm.DB
+
+	if startingID > 0 {
+		result = database.DB.Table(
+			"posts").Select(
+			"posts.id, posts.title, posts.text, users.name").Joins(
+			"join users on users.id = posts.user_id").Where(
+			"posts.id <= ?", startingID).Order(
+			"posts.id desc").Limit(
+			amount).Find(
+			&posts)
+	} else {
+		result = database.DB.Table(
+			"posts").Select(
+			"posts.id, posts.title, posts.text, users.name").Joins(
+			"join users on users.id = posts.user_id").Order(
+			"posts.id desc").Limit(
+			amount).Find(
+			&posts)
+	}
+
+	return posts, result.Error
 }
