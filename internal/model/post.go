@@ -20,6 +20,7 @@ type PostWithUserData struct {
 	Title string `json:"title" binding:"required"`
 	Text  string `json:"text" binding:"required"`
 	Name  string `json:"username" binding:"required"`
+    Picture string `json:"picture" binding:"required"`
 }
 
 type PostUpdateFields struct {
@@ -60,7 +61,7 @@ func GetPosts(startingID, amount int) ([]PostWithUserData, error) {
 	if startingID > 0 {
 		result = database.DB.Table(
 			"posts").Select(
-			"posts.id, posts.title, posts.text, users.name").Joins(
+			"posts.id, posts.title, posts.text, users.name, users.picture").Joins(
 			"join users on users.id = posts.user_id").Where(
 			"posts.id <= ?", startingID).Order(
 			"posts.id desc").Limit(
@@ -69,7 +70,7 @@ func GetPosts(startingID, amount int) ([]PostWithUserData, error) {
 	} else {
 		result = database.DB.Table(
 			"posts").Select(
-			"posts.id, posts.title, posts.text, users.name").Joins(
+			"posts.id, posts.title, posts.text, users.name, users.picture").Joins(
 			"join users on users.id = posts.user_id").Order(
 			"posts.id desc").Limit(
 			amount).Find(

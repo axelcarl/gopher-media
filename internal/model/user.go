@@ -14,6 +14,7 @@ type User struct {
 	Name     string `json:"name" binding:"required"`
 	Posts    []Post `json:"posts"`
 	Password string `json:"-"`
+	Picture  string `json:"picture" binding:"required"`
 }
 
 type UserRegistrationFields struct {
