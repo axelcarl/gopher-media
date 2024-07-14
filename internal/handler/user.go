@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -171,6 +172,76 @@ func UserRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "User was deleted.",
+		})
+		return
+	})
+
+	router.POST("/:id/picture", authMiddleware, func(c *gin.Context) {
+		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+		if err != nil {
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "ID must be an unsigned integer.",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		user, err := model.GetUser(uint(id))
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		fileHeader, err := c.FormFile("file")
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid file provided.",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		file, err := fileHeader.Open()
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Error opening file.",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		objectName := fmt.Sprintf("%s_profile_picture", user.Name)
+
+		err = model.UploadFile(objectName, file)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		err = model.SetPicture(user, objectName)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong while setting the profile picture.",
+				"error":   err,
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message":  "Profile picture successfully set.",
+			"filename": objectName,
 		})
 		return
 	})

@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/axelcarl/gopher-media/internal/database"
 
@@ -89,4 +91,18 @@ func UpdateUser(user *User, newFields *UserUpdateFields) error {
 func DeleteUser(user *User) error {
 	result := database.DB.Delete(&user)
 	return result.Error
+}
+
+func SetPicture(user *User, filename string) error {
+	bucket_url := os.Getenv("BUCKET_URL")
+	url := fmt.Sprintf("%s/%s", bucket_url, filename)
+
+	user.Picture = url
+	result := database.DB.Model(&user).Update("picture", user.Picture)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

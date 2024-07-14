@@ -23,7 +23,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid session.",
-				"error": err.Error(),
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return
@@ -42,7 +42,7 @@ func OwnerMiddleware() gin.HandlerFunc {
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "The post id should be an unsigned integer.",
-				"error": err.Error(),
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return
@@ -53,14 +53,14 @@ func OwnerMiddleware() gin.HandlerFunc {
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"message": "No post of that ID was found.",
-				"error": err.Error(),
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return
 		}
 
 		value, exists := c.Get("userID")
-		
+
 		stringUserID, ok := value.(string)
 
 		if !exists || !ok {
@@ -71,12 +71,12 @@ func OwnerMiddleware() gin.HandlerFunc {
 			return
 		}
 
-    userID, err := strconv.ParseUint(stringUserID, 10, 64)
+		userID, err := strconv.ParseUint(stringUserID, 10, 64)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Something went wrong.",
-				"error": err.Error(),
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return

@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/axelcarl/gopher-media/internal/cache"
@@ -42,9 +43,48 @@ func AuthRoutes(router *gin.RouterGroup, rdb *redis.Client, authFunc func(rdb *r
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "User logged in.",
+			"id":      userID,
 		})
 		return
 	})
 
-	router.GET("/authenticate", authFunc(rdb))
+	router.GET("/authenticate", authFunc(rdb), func(c *gin.Context) {
+		shouldReturnUser := c.Query("full")
+
+		if shouldReturnUser != "true" {
+			return
+		}
+
+		value, exists := c.Get("userID")
+
+		stringUserID, ok := value.(string)
+
+		if !exists || !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong.",
+			})
+			return
+		}
+
+		userID, err := strconv.ParseUint(stringUserID, 10, 64)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong.",
+			})
+			return
+		}
+
+		user, err := model.GetUser(uint(userID))
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Something went wrong.",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, user)
+		return
+	})
 }
